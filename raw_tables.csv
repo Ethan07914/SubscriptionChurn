@@ -1,0 +1,81 @@
+table_name,ddl
+accounts,"CREATE TABLE `subscriptionchurn.raw.accounts`
+(
+  account_id STRING,
+  account_name STRING,
+  industry STRING,
+  country STRING,
+  signup_date DATE,
+  referral_source STRING,
+  plan_tier STRING,
+  seats INT64,
+  is_trial BOOL,
+  churn_flag BOOL
+)
+OPTIONS(
+  expiration_timestamp=TIMESTAMP ""2026-08-13T11:11:20.435Z""
+);"
+subscriptions,"CREATE TABLE `subscriptionchurn.raw.subscriptions`
+(
+  subscription_id STRING,
+  account_id STRING,
+  start_date DATE,
+  end_date DATE,
+  plan_tier STRING,
+  seats INT64,
+  mrr_amount INT64,
+  arr_amount INT64,
+  is_trial BOOL,
+  upgrade_flag BOOL,
+  downgrade_flag BOOL,
+  churn_flag BOOL,
+  billing_frequency STRING,
+  auto_renew_flag BOOL
+)
+OPTIONS(
+  expiration_timestamp=TIMESTAMP ""2026-08-13T11:13:10.753Z""
+);"
+churn_events,"CREATE TABLE `subscriptionchurn.raw.churn_events`
+(
+  churn_event_id STRING,
+  account_id STRING,
+  churn_date DATE,
+  reason_code STRING,
+  refund_amount_usd FLOAT64,
+  preceding_upgrade_flag BOOL,
+  preceding_downgrade_flag BOOL,
+  is_reactivation BOOL,
+  feedback_text STRING
+)
+OPTIONS(
+  expiration_timestamp=TIMESTAMP ""2026-08-13T11:12:05.506Z""
+);"
+support_tickets,"CREATE TABLE `subscriptionchurn.raw.support_tickets`
+(
+  ticket_id STRING,
+  account_id STRING,
+  submitted_at DATE,
+  closed_at TIMESTAMP,
+  resolution_time_hours FLOAT64,
+  priority STRING,
+  first_response_time_minutes INT64,
+  satisfaction_score FLOAT64,
+  escalation_flag BOOL
+)
+OPTIONS(
+  expiration_timestamp=TIMESTAMP ""2026-08-13T11:13:40.966Z""
+);"
+feature_usage,"CREATE TABLE `subscriptionchurn.raw.feature_usage`
+(
+  usage_id STRING,
+  subscription_id STRING,
+  usage_date DATE,
+  feature_name STRING,
+  usage_count INT64,
+  usage_duration_secs INT64,
+  error_count INT64,
+  is_beta_feature BOOL
+)
+OPTIONS(
+  expiration_timestamp=TIMESTAMP ""2026-08-13T11:12:33.195Z""
+);"

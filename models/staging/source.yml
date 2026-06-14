@@ -1,0 +1,297 @@
+
+version: 2
+
+sources:
+  - name: raw_subscription
+    description: "Raw subscription data"
+    database: subscriptionchurn
+    schema: raw
+
+    tables:
+      - name: accounts
+        description: "Raw subscription accounts data — one row per customer."
+        columns:
+          - name: account_id
+            description: "Unique customer identifier (primary key)."
+          - name: account_name
+            description: "Company name."
+          - name: industry
+            description: "SaaS vertical (e.g., DevTools, EdTech)."
+          - name: country
+            description: "ISO-2 country code."
+          - name: signup_date
+            description: "Account creation date."
+          - name: referral_source
+            description: "Acquisition channel: organic, ads, event, partner, or other."
+          - name: plan_tier
+            description: "Initial plan: Basic, Pro, or Enterprise."
+          - name: seats
+            description: "Licensed user count."
+          - name: is_trial
+            description: "True if the account is currently trialing."
+          - name: churn_flag
+            description: "True if the account churned at any point."
+
+      - name: subscriptions
+        description: "Raw subscription data — one row per subscription/billing record, linked to an account."
+        columns:
+          - name: subscription_id
+            description: "Unique subscription identifier (primary key)."
+          - name: account_id
+            description: "Foreign key to accounts.account_id."
+          - name: start_date
+            description: "Subscription start date."
+          - name: end_date
+            description: "Subscription end date; null for active plans."
+          - name: plan_tier
+            description: "Plan at time of billing: Basic, Pro, or Enterprise."
+          - name: seats
+            description: "Licensed seats."
+          - name: mrr_amount
+            description: "Monthly recurring revenue."
+          - name: arr_amount
+            description: "Annual recurring revenue."
+          - name: is_trial
+            description: "True if this is a trial subscription."
+          - name: upgrade_flag
+            description: "True if the plan was upgraded mid-cycle."
+          - name: downgrade_flag
+            description: "True if the plan was downgraded mid-cycle."
+          - name: churn_flag
+            description: "True if the subscription ended."
+          - name: billing_frequency
+            description: "Billing cadence: monthly or annual."
+          - name: auto_renew_flag
+            description: "True if auto-renew is enabled."
+
+      - name: feature_usage
+        description: "Raw feature usage data — one row per feature usage event, linked to a subscription."
+        columns:
+          - name: usage_id
+            description: "Unique usage event identifier (primary key)."
+          - name: subscription_id
+            description: "Foreign key to subscriptions.subscription_id."
+          - name: usage_date
+            description: "Date of the usage event."
+          - name: feature_name
+            description: "Feature used, from a pool of 40 SaaS features."
+          - name: usage_count
+            description: "Number of times the feature was used in the event."
+          - name: usage_duration_secs
+            description: "Time spent using the feature, in seconds."
+          - name: error_count
+            description: "Number of errors logged during usage."
+          - name: is_beta_feature
+            description: "True if the feature is a beta feature."
+
+      - name: support_tickets
+        description: "Raw support tickets data — one row per support ticket, linked to an account."
+        columns:
+          - name: ticket_id
+            description: "Unique ticket identifier (primary key)."
+          - name: account_id
+            description: "Foreign key to accounts.account_id."
+          - name: submitted_at
+            description: "When the ticket was opened."
+          - name: closed_at
+            description: "When the ticket was resolved."
+          - name: resolution_time_hours
+            description: "Total resolution duration, in hours."
+          - name: priority
+            description: "Ticket priority: low, medium, high, or urgent."
+          - name: first_response_time_minutes
+            description: "Minutes elapsed until the first response."
+          - name: satisfaction_score
+            description: "Customer satisfaction rating 1–5; null if no response."
+          - name: escalation_flag
+            description: "True if the ticket was escalated."
+
+      - name: churn_events
+        description: "Raw subscription churn events data — one row per churn instance, linked to an account."
+        columns:
+          - name: churn_event_id
+            description: "Unique churn instance identifier (primary key)."
+          - name: account_id
+            description: "Foreign key to accounts.account_id."
+          - name: churn_date
+            description: "Date the account left."
+          - name: reason_code
+            description: "Churn reason: pricing, support, features, etc."
+          - name: refund_amount_usd
+            description: "Refund/credit amount in USD."
+          - name: preceding_upgrade_flag
+            description: "True if the account had an upgrade within 90 days before churn."
+          - name: preceding_downgrade_flag
+            description: "True if the account had a downgrade within 90 days before churn."
+          - name: is_reactivation
+            description: "True if the account had previously churned."
+          - name: feedback_text
+            description: "Optional free-text customer comment."
+
+models:
+  - name: stg_bigquery__accounts
+    description: "Staged accounts — one row per customer, cleaned from raw_subscription.accounts."
+    columns:
+      - name: account_id
+        description: "Unique customer identifier (primary key)."
+        data_tests:
+          - unique
+          - not_null
+      - name: account_name
+        description: "Company name."
+      - name: industry
+        description: "SaaS vertical (e.g., DevTools, EdTech)."
+      - name: country
+        description: "ISO-2 country code."
+      - name: signup_date
+        description: "Account creation date."
+      - name: referral_source
+        description: "Acquisition channel: organic, ads, event, partner, or other."
+      - name: plan_tier
+        description: "Initial plan: Basic, Pro, or Enterprise."
+      - name: seats
+        description: "Licensed user count."
+      - name: is_trial
+        description: "True if the account is currently trialing."
+      - name: churn_flag
+        description: "True if the account churned at any point."
+
+  - name: stg_bigquery__subscriptions
+    description: "Staged subscriptions — one row per subscription/billing record, cleaned from raw_subscription.subscriptions."
+    columns:
+      - name: subscription_id
+        description: "Unique subscription identifier (primary key)."
+        data_tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: "Foreign key to stg_accounts.account_id."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_bigquery__accounts')
+                field: account_id
+      - name: start_date
+        description: "Subscription start date."
+      - name: end_date
+        description: "Subscription end date; null for active plans."
+      - name: plan_tier
+        description: "Plan at time of billing: Basic, Pro, or Enterprise."
+      - name: seats
+        description: "Licensed seats."
+      - name: mrr_amount
+        description: "Monthly recurring revenue."
+      - name: arr_amount
+        description: "Annual recurring revenue."
+      - name: is_trial
+        description: "True if this is a trial subscription."
+      - name: upgrade_flag
+        description: "True if the plan was upgraded mid-cycle."
+      - name: downgrade_flag
+        description: "True if the plan was downgraded mid-cycle."
+      - name: churn_flag
+        description: "True if the subscription ended."
+      - name: billing_frequency
+        description: "Billing cadence: monthly or annual."
+      - name: auto_renew_flag
+        description: "True if auto-renew is enabled."
+
+  - name: stg_bigquery__feature_usage
+    description: "Staged feature usage — one row per feature usage event, cleaned from raw_subscription.feature_usage."
+    columns:
+      - name: subscription_usage_pk
+        description: 'Primary surrogate key derived from subscription_id and usage_id '
+        data_tests:
+          - unique
+          - not_null
+      - name: usage_id
+        description: >
+          Unique usage event identifier (primary key). NOTE: the `unique` test currently
+          FAILS — the raw source contains 21 duplicate usage_id values (first seen 2026-06-14).
+          See documentation/test_failures.md for root cause and remediation options.
+        data_tests:
+          - not_null
+      - name: subscription_id
+        description: "Foreign key to stg_subscriptions.subscription_id."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_bigquery__subscriptions')
+                field: subscription_id
+      - name: usage_date
+        description: "Date of the usage event."
+      - name: feature_name
+        description: "Feature used, from a pool of 40 SaaS features."
+      - name: usage_count
+        description: "Number of times the feature was used in the event."
+      - name: usage_duration_secs
+        description: "Time spent using the feature, in seconds."
+      - name: error_count
+        description: "Number of errors logged during usage."
+      - name: is_beta_feature
+        description: "True if the feature is a beta feature."
+
+  - name: stg_bigquery__support_tickets
+    description: "Staged support tickets — one row per support ticket, cleaned from raw_subscription.support_tickets."
+    columns:
+      - name: ticket_id
+        description: "Unique ticket identifier (primary key)."
+        data_tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: "Foreign key to stg_accounts.account_id."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_bigquery__accounts')
+                field: account_id
+      - name: submitted_at
+        description: "When the ticket was opened."
+      - name: closed_at
+        description: "When the ticket was resolved."
+      - name: resolution_time_hours
+        description: "Total resolution duration, in hours."
+      - name: priority
+        description: "Ticket priority: low, medium, high, or urgent."
+      - name: first_response_time_minutes
+        description: "Minutes elapsed until the first response."
+      - name: satisfaction_score
+        description: "Customer satisfaction rating 1–5; null if no response."
+      - name: escalation_flag
+        description: "True if the ticket was escalated."
+
+  - name: stg_bigquery__churn_events
+    description: "Staged churn events — one row per churn instance, cleaned from raw_subscription.churn_events."
+    columns:
+      - name: churn_event_id
+        description: "Unique churn instance identifier (primary key)."
+        data_tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: "Foreign key to stg_accounts.account_id."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_bigquery__accounts')
+                field: account_id
+      - name: churn_date
+        description: "Date the account left."
+      - name: reason_code
+        description: "Churn reason: pricing, support, features, etc."
+      - name: refund_amount_usd
+        description: "Refund/credit amount in USD."
+      - name: preceding_upgrade_flag
+        description: "True if the account had an upgrade within 90 days before churn."
+      - name: preceding_downgrade_flag
+        description: "True if the account had a downgrade within 90 days before churn."
+      - name: is_reactivation
+        description: "True if the account had previously churned."
+      - name: feedback_text
+        description: "Optional free-text customer comment."
+
