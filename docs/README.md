@@ -152,7 +152,7 @@ models/
 
 ## Raw Schema (`subscriptionchurn.raw`)
 
-Entity-relationship diagram generated from the DDL in [`raw_tables.csv`](./raw_tables.csv).
+Entity-relationship diagram generated from the DDL in [`raw_tables.csv`](raw_tables.csv).
 
 ```mermaid
 erDiagram

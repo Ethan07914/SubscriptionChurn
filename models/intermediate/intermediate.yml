@@ -1,0 +1,20 @@
+
+version: 2
+
+models:
+  - name: int_joined__subscription_account
+    description: Subscription and accounts joined
+    columns:
+      - name: account_subscription_pk
+        description: Primary key uniquely identifies a account subscription
+        data_tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: Foreign key identifies an account
+        data_tests:
+          - not_null
+      - name: subscription_id
+        description: Foreign key identifies an subscription
+        data_tests:
+          - not_null
