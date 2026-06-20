@@ -2,7 +2,7 @@
 version: 2
 
 models:
-  - name: int_joined__subscription_account
+  - name: int_joined__subscription_accounts
     description: Subscription and accounts joined
     columns:
       - name: account_subscription_pk
@@ -18,3 +18,47 @@ models:
         description: Foreign key identifies an subscription
         data_tests:
           - not_null
+
+  - name: int_enriched__features
+    description: Table which holds features
+    columns:
+      - name: feature_pk
+        description: Primary key, unique identifier for a feature
+        data_tests:
+          - unique
+          - not_null
+
+  - name: int_aggregated__subscription_feature_usage
+    description: One row per subscription per feature, how much each subscriber has used a particular feature
+    columns:
+      - name: subscription_feature_usage_pk
+        description: Primary key, uniquely identifies a subscribers usage of a particular feature
+        data_tests:
+          - unique
+          - not_null
+      - name: subscription_id
+        description: Foreign key, identifies a subscription, joins to stg_bigquery__subscriptions
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_bigquery__subscriptions')
+                field: subscription_id
+      - name: feature_fk
+        description: Foreign key, identifies a feature, joins to int_enriched__features
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('int_enriched__features')
+                field: feature_pk
+
+  - name: int_aggregated__account_support_tickets
+    description: Support ticket metrics for each account
+    columns:
+      - name: account_id
+        description: Primary key, unique identifier for an account
+        data_tests:
+          - unique
+          - not_null
+

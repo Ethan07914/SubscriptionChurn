@@ -4,7 +4,7 @@ config(
 }}
 
 SELECT
-    {{ dbt_utils.generate_surrogate_key(['usage_id', 'subscription_id']) }} as subscription_usage_pk,
+    {{ dbt_utils.generate_surrogate_key(['usage_id', 'subscription_id']) }} as feature_usage_pk,
     usage_id,
     subscription_id,
     usage_date,

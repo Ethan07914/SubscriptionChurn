@@ -133,7 +133,7 @@ models:
     description: "Staged accounts — one row per customer, cleaned from raw_subscription.accounts."
     columns:
       - name: account_id
-        description: "Unique customer identifier (primary key)."
+        description: "Unique customer identifier (natural key)."
         data_tests:
           - unique
           - not_null
@@ -160,7 +160,7 @@ models:
     description: "Staged subscriptions — one row per subscription/billing record, cleaned from raw_subscription.subscriptions."
     columns:
       - name: subscription_id
-        description: "Unique subscription identifier (primary key)."
+        description: "Unique subscription identifier (natural key)."
         data_tests:
           - unique
           - not_null
@@ -200,7 +200,7 @@ models:
   - name: stg_bigquery__feature_usage
     description: "Staged feature usage — one row per feature usage event, cleaned from raw_subscription.feature_usage."
     columns:
-      - name: subscription_usage_pk
+      - name: feature_usage_pk
         description: 'Primary surrogate key derived from subscription_id and usage_id '
         data_tests:
           - unique
@@ -237,7 +237,7 @@ models:
     description: "Staged support tickets — one row per support ticket, cleaned from raw_subscription.support_tickets."
     columns:
       - name: ticket_id
-        description: "Unique ticket identifier (primary key)."
+        description: "Unique ticket identifier (natural key)."
         data_tests:
           - unique
           - not_null
@@ -268,7 +268,7 @@ models:
     description: "Staged churn events — one row per churn instance, cleaned from raw_subscription.churn_events."
     columns:
       - name: churn_event_id
-        description: "Unique churn instance identifier (primary key)."
+        description: "Unique churn instance identifier (natural key)."
         data_tests:
           - unique
           - not_null
@@ -294,4 +294,13 @@ models:
         description: "True if the account had previously churned."
       - name: feedback_text
         description: "Optional free-text customer comment."
+
+  - name: int_aggregated__account_churn_events
+    description: One row per account, summarises all churn events from each account
+    columns:
+      - name: account_id
+        description: Primary key, unique identifier for an account
+        data_tests:
+          - not_null
+          - unique
 
