@@ -1,0 +1,29 @@
+{{
+    config(
+        materialized='table')
+}}
+
+SELECT
+    account_id,
+    industry,
+    country,
+    referral_source,
+    plan_tier,
+    is_trial,
+    churn_flag,
+    total_satisfaction_scores,
+    total_support_tickets,
+    total_resolution_time_hours,
+    total_first_response_time_minutes,
+    total_satisfaction_score,
+    total_escalated_tickets,
+    total_unescalated_tickets,
+    total_high_priority,
+    total_low_priority,
+    total_medium_priority,
+    total_urgent_priority,
+    average_resolution_time_hours,
+    average_first_response_time_minutes,
+    average_satisfaction_score
+FROM
+    {{ ref('int_aggregated__account_support_tickets')}}

@@ -1,0 +1,34 @@
+{{
+    config(
+        materialized='table')
+}}
+
+SELECT
+    account_id,
+    industry,
+    country,
+    referral_source,
+    plan_tier,
+    is_trial,
+    churn_flag,
+    total_churn_events,
+    total_refunds,
+    total_reactivations,
+    total_refund_amount_usd,
+    total_preceding_downgrade_flags,
+    total_preceding_upgrade_flags,
+    total_budget_reason_code,
+    total_competitor_reason_code,
+    total_features_reason_code,
+    total_pricing_reason_code,
+    total_support_reason_code,
+    total_unknown_reason_code,
+    total_feedback_missing_features,
+    total_feedback_switched_to_competitor,
+    total_feedback_to_expensive,
+    total_feedback_not_given,
+    average_refund_amount,
+    last_churn_event_date,
+    currently_active
+FROM
+    {{ ref('int_aggregated__account_churn_events')}}

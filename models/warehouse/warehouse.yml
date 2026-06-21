@@ -1,0 +1,258 @@
+version: 2
+
+models:
+  - name: account_dim
+    description: One row per account with descriptive account attributes.
+    columns:
+      - name: account_id
+        description: Primary key. Unique identifier for the account.
+        tests:
+          - not_null
+          - unique
+      - name: account_name
+        description: Display name of the account.
+      - name: industry
+        description: Industry the account operates in.
+      - name: country
+        description: Account country.
+      - name: signup_date
+        description: Date the account signed up.
+      - name: referral_source
+        description: Channel that referred the account.
+      - name: plan_tier
+        description: Current plan tier of the account.
+      - name: number_of_seats
+        description: Number of seats on the account.
+      - name: is_trial
+        description: Whether the account is on a trial.
+      - name: churn_flag
+        description: Whether the account has churned.
+
+  - name: subscription_dim
+    description: One row per subscription with descriptive subscription attributes.
+    columns:
+      - name: subscription_id
+        description: Primary key. Unique identifier for the subscription.
+        tests:
+          - not_null
+          - unique
+      - name: start_date
+        description: Subscription start date.
+      - name: end_date
+        description: Subscription end date (null while active).
+      - name: plan_tier
+        description: Plan tier of the subscription.
+      - name: number_of_seats
+        description: Number of seats on the subscription.
+      - name: mrr_amount
+        description: Monthly recurring revenue for the subscription.
+      - name: arr_amount
+        description: Annual recurring revenue for the subscription.
+      - name: is_trial
+        description: Whether the subscription is a trial.
+      - name: upgrade_flag
+        description: Whether the subscription was upgraded mid-cycle.
+      - name: downgrade_flag
+        description: Whether the subscription was downgraded mid-cycle.
+      - name: churn_flag
+        description: Whether the subscription has churned.
+      - name: billing_frequency
+        description: Billing frequency of the subscription.
+      - name: auto_renew_flag
+        description: Whether auto-renew is enabled.
+
+  - name: revenue_fct
+    description: One row per subscription with account context and derived revenue metrics.
+    columns:
+      - name: subscription_id
+        description: Primary key. Unique identifier for the subscription.
+        tests:
+          - not_null
+          - unique
+      - name: account_id
+        description: Foreign key to account_dim.
+      - name: account_name
+        description: Display name of the account.
+      - name: industry
+        description: Industry the account operates in.
+      - name: country
+        description: Account country.
+      - name: account_signup_date
+        description: Date the account signed up.
+      - name: referral_source
+        description: Channel that referred the account.
+      - name: plan_tier
+        description: Plan tier of the subscription.
+      - name: number_of_seats
+        description: Number of seats on the subscription.
+      - name: is_trial
+        description: Whether the subscription is a trial.
+      - name: churn_flag
+        description: Whether the subscription has churned.
+      - name: subscription_start_date
+        description: Subscription start date.
+      - name: subscription_end_date
+        description: Subscription end date (null while active).
+      - name: total_months_subscribed
+        description: Months between subscription start and end (or current date if active).
+      - name: mrr_amount
+        description: Monthly recurring revenue for the subscription.
+      - name: arr_amount
+        description: Annual recurring revenue for the subscription.
+      - name: upgrade_flag
+        description: Whether the subscription was upgraded mid-cycle.
+      - name: downgrade_flag
+        description: Whether the subscription was downgraded mid-cycle.
+      - name: billing_frequency
+        description: Billing frequency of the subscription.
+      - name: auto_renew_flag
+        description: Whether auto-renew is enabled.
+      - name: lifetime_value
+        description: MRR multiplied by total months subscribed.
+      - name: time_to_churn_days
+        description: Days between subscription start and end (null while active).
+
+  - name: churn_events_fct
+    description: One row per account aggregating churn events, refunds, reason codes, and feedback.
+    columns:
+      - name: account_id
+        description: Primary key. Unique identifier for the account.
+        tests:
+          - not_null
+          - unique
+      - name: industry
+        description: Industry the account operates in.
+      - name: country
+        description: Account country.
+      - name: referral_source
+        description: Channel that referred the account.
+      - name: plan_tier
+        description: Plan tier of the account.
+      - name: is_trial
+        description: Whether the account is on a trial.
+      - name: churn_flag
+        description: Whether the account has churned.
+      - name: total_churn_events
+        description: Count of distinct churn events for the account.
+      - name: total_refunds
+        description: Count of churn events with a refund.
+      - name: total_reactivations
+        description: Count of reactivation churn events.
+      - name: total_refund_amount_usd
+        description: Sum of refund amounts in USD.
+      - name: total_preceding_downgrade_flags
+        description: Count of churn events preceded by a downgrade.
+      - name: total_preceding_upgrade_flags
+        description: Count of churn events preceded by an upgrade.
+      - name: total_budget_reason_code
+        description: Count of churn events with reason code 'budget'.
+      - name: total_competitor_reason_code
+        description: Count of churn events with reason code 'competitor'.
+      - name: total_features_reason_code
+        description: Count of churn events with reason code 'features'.
+      - name: total_pricing_reason_code
+        description: Count of churn events with reason code 'pricing'.
+      - name: total_support_reason_code
+        description: Count of churn events with reason code 'support'.
+      - name: total_unknown_reason_code
+        description: Count of churn events with reason code 'unknown'.
+      - name: total_feedback_missing_features
+        description: Count of churn events with feedback 'missing features'.
+      - name: total_feedback_switched_to_competitor
+        description: Count of churn events with feedback 'switched to competitor'.
+      - name: total_feedback_to_expensive
+        description: Count of churn events with feedback 'too expensive'.
+      - name: total_feedback_not_given
+        description: Count of churn events with no feedback text.
+      - name: average_refund_amount
+        description: Average refund amount across refunded churn events.
+      - name: last_churn_event_date
+        description: Date of the most recent churn event.
+      - name: currently_active
+        description: Whether the account is currently active based on its latest churn event.
+
+  - name: support_tickets_fct
+    description: One row per account aggregating support ticket volume, timing, priority, and satisfaction.
+    columns:
+      - name: account_id
+        description: Primary key. Unique identifier for the account.
+        tests:
+          - not_null
+          - unique
+      - name: industry
+        description: Industry the account operates in.
+      - name: country
+        description: Account country.
+      - name: referral_source
+        description: Channel that referred the account.
+      - name: plan_tier
+        description: Plan tier of the account.
+      - name: is_trial
+        description: Whether the account is on a trial.
+      - name: churn_flag
+        description: Whether the account has churned.
+      - name: total_satisfaction_scores
+        description: Count of tickets with a satisfaction score.
+      - name: total_support_tickets
+        description: Count of distinct support tickets.
+      - name: total_resolution_time_hours
+        description: Sum of resolution time in hours.
+      - name: total_first_response_time_minutes
+        description: Sum of first response time in minutes.
+      - name: total_satisfaction_score
+        description: Sum of satisfaction scores.
+      - name: total_escalated_tickets
+        description: Count of escalated tickets.
+      - name: total_unescalated_tickets
+        description: Count of non-escalated tickets.
+      - name: total_high_priority
+        description: Count of high priority tickets.
+      - name: total_low_priority
+        description: Count of low priority tickets.
+      - name: total_medium_priority
+        description: Count of medium priority tickets.
+      - name: total_urgent_priority
+        description: Count of urgent priority tickets.
+      - name: average_resolution_time_hours
+        description: Average resolution time in hours per ticket.
+      - name: average_first_response_time_minutes
+        description: Average first response time in minutes per ticket.
+      - name: average_satisfaction_score
+        description: Average satisfaction score per scored ticket.
+
+  - name: feature_usage_fct
+    description: One row per subscription and feature aggregating usage, duration, and errors. Grain is subscription_id + feature_fk.
+    columns:
+      - name: subscription_feature_usage_pk
+        description: Primary key. Surrogate key hashed from subscription_id and feature_fk.
+        tests:
+          - not_null
+          - unique
+      - name: subscription_id
+        description: Foreign key to subscription_dim.
+      - name: account_id
+        description: Foreign key to account_dim.
+      - name: feature_fk
+        description: Foreign key to the feature.
+      - name: feature_name
+        description: Name of the feature.
+      - name: plan_tier
+        description: Plan tier of the subscription.
+      - name: is_trial
+        description: Whether the subscription is a trial.
+      - name: upgrade_flag
+        description: Whether the subscription was upgraded mid-cycle.
+      - name: downgrade_flag
+        description: Whether the subscription was downgraded mid-cycle.
+      - name: churn_flag
+        description: Whether the subscription has churned.
+      - name: billing_frequency
+        description: Billing frequency of the subscription.
+      - name: auto_renew_flag
+        description: Whether auto-renew is enabled.
+      - name: total_usage_count
+        description: Sum of usage counts for the feature on the subscription.
+      - name: total_usage_duration_secs
+        description: Sum of usage duration in seconds.
+      - name: total_error_count
+        description: Sum of error counts for the feature on the subscription.
