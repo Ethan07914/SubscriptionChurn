@@ -140,10 +140,6 @@ FROM
     on sp.account_id = st.account_id and sp.activity_date = st.submitted_at
     left join churn_events as ce
     on sp.account_id = ce.account_id and sp.activity_date = ce.churn_date
-WHERE
-    (fu.account_id IS NOT NULL
-     OR st.account_id IS NOT NULL
-     OR CE.account_id IS NOT NULL)
-    )
+)
 
 SELECT * FROM final
