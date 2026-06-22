@@ -256,3 +256,85 @@ models:
         description: Sum of usage duration in seconds.
       - name: total_error_count
         description: Sum of error counts for the feature on the subscription.
+
+  - name: account_activity_fct
+    description: One row per account per active day, combining feature usage, support ticket, and churn activity. Grain is account_id + activity_date. A day appears only if the account had activity in at least one source that day; measures from sources with no activity are coalesced to 0.
+    columns:
+      - name: account_date_pk
+        description: Primary key. Surrogate key hashed from account_id and activity_date.
+        tests:
+          - not_null
+          - unique
+      - name: account_id
+        description: Foreign key to account_dim. Identifies the account the activity belongs to.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('account_dim')
+              field: account_id
+      - name: activity_date
+        description: The day of activity. Sourced from the spine union of feature usage, support ticket, and churn dates.
+      - name: account_name
+        description: Display name of the account.
+      - name: industry
+        description: Industry the account operates in.
+      - name: country
+        description: Account country.
+      - name: signup_date
+        description: Date the account signed up.
+      - name: referral_source
+        description: Channel that referred the account.
+      - name: plan_tier
+        description: Current plan tier of the account.
+      - name: number_of_seats
+        description: Number of seats on the account.
+      - name: is_trial
+        description: Whether the account is on a trial.
+      - name: total_resolution_time_hours
+        description: Sum of ticket resolution time in hours for the account on the day. 0 if no tickets.
+      - name: avg_resolution_time_hours
+        description: Average ticket resolution time in hours for the account on the day. 0 if no tickets.
+      - name: total_first_response_time_minutes
+        description: Sum of first response time in minutes for the account on the day. 0 if no tickets.
+      - name: avg_first_response_time_minutes
+        description: Average first response time in minutes for the account on the day. 0 if no tickets.
+      - name: total_tickets
+        description: Count of support tickets submitted by the account on the day. 0 if none.
+      - name: total_high_priority_tickets
+        description: Count of high priority tickets on the day. 0 if none.
+      - name: total_low_priority_tickets
+        description: Count of low priority tickets on the day. 0 if none.
+      - name: total_medium_priority_tickets
+        description: Count of medium priority tickets on the day. 0 if none.
+      - name: total_urgent_priority_tickets
+        description: Count of urgent priority tickets on the day. 0 if none.
+      - name: total_escalated_ticket
+        description: Count of escalated tickets on the day. 0 if none.
+      - name: total_response_satisfaction_score
+        description: Sum of satisfaction scores across tickets on the day. 0 if none.
+      - name: average_response_satisfaction_score
+        description: Average satisfaction score across scored tickets on the day. 0 if none.
+      - name: total_features_used
+        description: Count of distinct features used by the account on the day. 0 if no usage.
+      - name: total_beta_features_used
+        description: Count of beta feature usage events on the day. 0 if no usage.
+      - name: total_usage_count
+        description: Sum of usage counts across features on the day. 0 if no usage.
+      - name: total_usage_duration_secs
+        description: Sum of usage duration in seconds across features on the day. 0 if no usage.
+      - name: total_error_count
+        description: Sum of error counts across features on the day. 0 if no usage.
+      - name: total_churn_events
+        description: Count of (non-reactivation) churn events for the account on the day. 0 if no churn event.
+      - name: churn_reason_code
+        description: Comma-separated distinct reason codes from churn events on the day. Null if the account did not churn that day.
+      - name: refund_amount_usd
+        description: Refund amount in USD from the churn event on the day. 0 if no churn event.
+      - name: preceding_upgrade_flag
+        description: Whether the churn event was preceded by an upgrade. Null if the account did not churn that day.
+      - name: preceding_downgrade_flag
+        description: Whether the churn event was preceded by a downgrade. Null if the account did not churn that day.
+      - name: churn_feedback_text
+        description: Comma-separated distinct free-text feedback from churn events on the day. Null if the account did not churn that day.
+      - name: churned_today
+        description: Whether a (non-reactivation) churn event occurred for the account on the day.
